@@ -1,15 +1,11 @@
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub enum TokenType {
     Keyword,
-    UnknownKeyword,
     Text,
     Option,
-    UnknownOption,
-    IllegalCharacter,
-    EOF,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub struct Token {
     pub token_type: TokenType,
     pub value: Option<Vec<char>>,
