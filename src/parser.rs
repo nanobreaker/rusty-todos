@@ -2,16 +2,17 @@ use chrono::NaiveDateTime;
 
 use crate::{
     command::Command,
-    token::{self, Keyword, Token},
+    token::{self, Keyword, Text, Token},
     tokenizer::Tokenizer,
 };
 
 pub enum ParserErr {
-    EmptyTokens,
-    EmptyArgument,
+    EmptySource,
+    RequiredArgument,
     UnexpectedToken,
 }
 
+#[derive(Default)]
 pub struct Parser {
     pub tokenizer: Tokenizer,
 }
@@ -25,7 +26,7 @@ impl Parser {
         let chars: Vec<char> = source.chars().collect();
         let tokens: Vec<Token> = match self.tokenizer.tokenize(chars) {
             Ok(it) => it,
-            Err(_) => return Err(ParserErr::EmptyTokens),
+            Err(_) => return Err(ParserErr::EmptySource),
         };
 
         self.parse_program(&tokens)
@@ -58,8 +59,8 @@ impl Parser {
         let (argument_token, tokens) = tokens.split_first().expect("no tokens");
 
         let title = match argument_token {
-            Token::Text(Some(text)) => text.clone(),
-            _ => return Err(ParserErr::UnexpectedToken),
+            Token::Text(Text::Some(text)) => text.clone(),
+            _ => return Err(ParserErr::RequiredArgument),
         };
         let description = self.extract_option(&token::Option::Description, tokens);
         let start = self
@@ -82,11 +83,11 @@ impl Parser {
     }
 
     fn parse_user_command(&mut self, _tokens: &[Token]) -> Result<Command, ParserErr> {
-        Ok(Command::UserRead)
+        todo!()
     }
 
     fn parse_calendar_command(&mut self, _tokens: &[Token]) -> Result<Command, ParserErr> {
-        Ok(Command::CalendarRead)
+        todo!()
     }
 
     fn extract_option(&mut self, option_type: &token::Option, tokens: &[Token]) -> Option<String> {
@@ -94,7 +95,7 @@ impl Parser {
             .windows(2)
             .find(|window| matches!(&window[0], Token::Option(option) if option == option_type))
             .map(|window| match &window[1] {
-                Token::Text(Some(text)) => Some(text.clone()),
+                Token::Text(Text::Some(text)) => Some(text.clone()),
                 _ => None,
             })
             .flatten()

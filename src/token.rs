@@ -11,6 +11,12 @@ pub enum Keyword {
 }
 
 #[derive(PartialEq, Clone)]
+pub enum Text {
+    Some(String),
+    None,
+}
+
+#[derive(PartialEq, Clone)]
 pub enum Option {
     Title,
     Description,
@@ -22,14 +28,14 @@ pub enum Option {
 #[derive(PartialEq, Clone)]
 pub enum Token {
     Keyword(Keyword),
-    Text(core::option::Option<String>),
+    Text(Text),
     Option(Option),
 }
 
-impl Keyword {
-    pub fn from(source: Vec<char>) -> Self {
-        let str_slice: &str = &source.iter().collect::<String>();
-        match str_slice {
+impl Into<Keyword> for Vec<char> {
+    fn into(self) -> Keyword {
+        let keyword: &str = &self.iter().collect::<String>();
+        match keyword {
             "todo" => Keyword::Todo,
             "user" => Keyword::User,
             "calendar" => Keyword::Calendar,
@@ -42,10 +48,20 @@ impl Keyword {
     }
 }
 
-impl Option {
-    pub fn from(source: Vec<char>) -> Self {
-        let str_slice: &str = &source.iter().collect::<String>();
-        match str_slice {
+impl Into<Text> for Vec<char> {
+    fn into(self) -> Text {
+        if self.is_empty() {
+            Text::None
+        } else {
+            Text::Some(self.into_iter().collect())
+        }
+    }
+}
+
+impl Into<Option> for Vec<char> {
+    fn into(self) -> Option {
+        let option: &str = &self.iter().collect::<String>();
+        match option {
             "t" => Option::Title,
             "d" => Option::Description,
             "s" => Option::Start,

@@ -1,11 +1,11 @@
-use std::char;
-
-use crate::token::{self, Keyword, Token};
+use crate::token::Keyword;
+use crate::token::Token;
 
 pub enum TokenizerErr {
     Error,
 }
 
+#[derive(Default)]
 pub struct Tokenizer {}
 
 enum State {
@@ -26,17 +26,17 @@ enum CharCode {
     Empty,
 }
 
-impl CharCode {
-    fn from(char: &Option<char>) -> Self {
-        match char {
+impl Into<CharCode> for Option<char> {
+    fn into(self) -> CharCode {
+        match self {
             Some(c) => {
                 if c.is_alphabetic() {
                     CharCode::Alphabetic
                 } else if c.is_whitespace() {
                     CharCode::Whitespace
-                } else if *c == '"' {
+                } else if c == '"' {
                     CharCode::QuotationMark
-                } else if *c == '-' {
+                } else if c == '-' {
                     CharCode::Dash
                 } else {
                     CharCode::NotSupported
@@ -61,7 +61,7 @@ impl Tokenizer {
 
         loop {
             state = match state {
-                State::BeginToken => match CharCode::from(&char) {
+                State::BeginToken => match &char.into() {
                     CharCode::Alphabetic => {
                         char_buffer.push(char.unwrap());
                         char = char_iter.next();
@@ -81,22 +81,22 @@ impl Tokenizer {
                     }
                     _ => State::Exit,
                 },
-                State::Keyword => match CharCode::from(&char) {
+                State::Keyword => match &char.into() {
                     CharCode::Alphabetic => {
                         char_buffer.push(char.unwrap());
                         char = char_iter.next();
                         State::Keyword
                     }
                     _ => {
-                        let keyword = char_buffer.clone().into_iter().collect();
-                        State::EndToken(Token::Keyword(Keyword::from(keyword)))
+                        let token = Token::Keyword(char_buffer.clone().into());
+                        State::EndToken(token)
                     }
                 },
-                State::Text => match CharCode::from(&char) {
+                State::Text => match &char.into() {
                     CharCode::QuotationMark => {
                         char = char_iter.next();
-                        let text = char_buffer.clone().into_iter().collect();
-                        State::EndToken(Token::Text(Some(text)))
+                        let token = Token::Text(char_buffer.clone().into());
+                        State::EndToken(token)
                     }
                     _ => {
                         char_buffer.push(char.unwrap());
@@ -104,14 +104,14 @@ impl Tokenizer {
                         State::Text
                     }
                 },
-                State::Option => match CharCode::from(&char) {
+                State::Option => match &char.into() {
                     CharCode::QuotationMark => {
-                        let option = char_buffer.clone().into_iter().collect();
-                        State::EndToken(Token::Option(token::Option::from(option)))
+                        let token = Token::Option(char_buffer.clone().into());
+                        State::EndToken(token)
                     }
                     CharCode::Empty => {
-                        let option = char_buffer.clone().into_iter().collect();
-                        State::EndToken(Token::Option(token::Option::from(option)))
+                        let token = Token::Option(char_buffer.clone().into());
+                        State::EndToken(token)
                     }
                     CharCode::Whitespace => {
                         char = char_iter.next();
@@ -141,7 +141,7 @@ impl Tokenizer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::token;
+    use crate::token::{self, Text};
     use core::fmt;
 
     impl fmt::Debug for Token {
@@ -214,7 +214,7 @@ mod tests {
         assert_eq!(tokens.len(), 1);
         assert_eq!(
             tokens.get(0),
-            Some(&Token::Text(Some(String::from("rusty todos"))))
+            Some(&Token::Text(Text::Some(String::from("rusty todos"))))
         );
         Ok(())
     }
@@ -234,7 +234,7 @@ mod tests {
         );
         assert_eq!(
             tokens.get(3),
-            Some(&Token::Text(Some(String::from("rusty todos"))))
+            Some(&Token::Text(Text::Some(String::from("rusty todos"))))
         );
         Ok(())
     }
@@ -256,12 +256,12 @@ mod tests {
         );
         assert_eq!(
             tokens.get(3),
-            Some(&Token::Text(Some(String::from("rusty todos"))))
+            Some(&Token::Text(Text::Some(String::from("rusty todos"))))
         );
         assert_eq!(tokens.get(4), Some(&Token::Option(token::Option::Start)));
         assert_eq!(
             tokens.get(5),
-            Some(&Token::Text(Some(String::from("02.10.2024"))))
+            Some(&Token::Text(Text::Some(String::from("02.10.2024"))))
         );
         Ok(())
     }

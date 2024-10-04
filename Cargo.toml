@@ -6,5 +6,6 @@ edition = "2021"
 [dependencies]
 color-eyre = "0.6.2"
 ratatui = { version = "0.28.1", features = ["serde"] }
+tui-textarea = "0.6.1"
 serde = "1.0.210"
 chrono = "0.4.38"
