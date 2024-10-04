@@ -1,9 +1,9 @@
+mod command;
 mod parser;
 mod token;
 mod tokenizer;
 
 use color_eyre::Result;
-use parser::Parser;
 use ratatui::crossterm::event;
 use ratatui::crossterm::event::Event;
 use ratatui::crossterm::event::KeyCode;
@@ -14,13 +14,11 @@ use ratatui::widgets::Block;
 use ratatui::widgets::Paragraph;
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
-use std::io;
-use tokenizer::Tokenizer;
 
 #[derive(Debug, Default)]
 struct App {
     input: String,
-    output: String,
+    _output: String,
 }
 
 fn main() -> Result<()> {
@@ -35,7 +33,7 @@ impl App {
     const fn new() -> Self {
         Self {
             input: String::new(),
-            output: String::new(),
+            _output: String::new(),
         }
     }
 

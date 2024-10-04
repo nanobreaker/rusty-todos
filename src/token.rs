@@ -1,18 +1,56 @@
-#[derive(PartialEq)]
-pub enum TokenType {
-    Keyword,
-    Text,
-    Option,
+#[derive(PartialEq, Clone)]
+pub enum Keyword {
+    Todo,
+    User,
+    Calendar,
+    Create,
+    Read,
+    Update,
+    Delete,
+    Unknown,
 }
 
-#[derive(PartialEq)]
-pub struct Token {
-    pub token_type: TokenType,
-    pub value: Option<Vec<char>>,
+#[derive(PartialEq, Clone)]
+pub enum Option {
+    Title,
+    Description,
+    Start,
+    End,
+    Unknown,
 }
 
-impl Token {
-    pub fn new(token_type: TokenType, value: Option<Vec<char>>) -> Self {
-        return Self { token_type, value };
+#[derive(PartialEq, Clone)]
+pub enum Token {
+    Keyword(Keyword),
+    Text(core::option::Option<String>),
+    Option(Option),
+}
+
+impl Keyword {
+    pub fn from(source: Vec<char>) -> Self {
+        let str_slice: &str = &source.iter().collect::<String>();
+        match str_slice {
+            "todo" => Keyword::Todo,
+            "user" => Keyword::User,
+            "calendar" => Keyword::Calendar,
+            "create" => Keyword::Create,
+            "read" => Keyword::Read,
+            "update" => Keyword::Update,
+            "delete" => Keyword::Delete,
+            _ => Keyword::Unknown,
+        }
+    }
+}
+
+impl Option {
+    pub fn from(source: Vec<char>) -> Self {
+        let str_slice: &str = &source.iter().collect::<String>();
+        match str_slice {
+            "t" => Option::Title,
+            "d" => Option::Description,
+            "s" => Option::Start,
+            "e" => Option::End,
+            _ => Option::Unknown,
+        }
     }
 }
